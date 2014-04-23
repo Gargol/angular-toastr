@@ -164,9 +164,15 @@ angular.module('toastr', [])
       toasts.push(newToast);
 
       _setContainer(options).then(function() {
-        $animate.enter(newToast.el, container, null, function() {
-          newToast.scope.init();
-        });
+        if (container[0].lastChild) {
+          $animate.enter(newToast.el, container, angular.element(container[0].lastChild), function() {
+            newToast.scope.init();
+          });
+        } else {
+          $animate.enter(newToast.el, container, null, function() {
+            newToast.scope.init();
+          });
+        }
       });
 
       return newToast;
