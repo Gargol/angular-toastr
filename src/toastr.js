@@ -203,9 +203,7 @@ angular.module('toastr', [])
 
     function remove(toastIndex) {
       var toast = findToast(toastIndex);
-
       if (toast) { // Avoid clicking when fading out
-
         $animate.leave(toast.el, function() {
           toast.scope.$destroy();
           if (container && container.children().length === 0) {

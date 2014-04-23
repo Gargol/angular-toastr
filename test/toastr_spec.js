@@ -2,6 +2,8 @@ describe('toastr', function() {
   var $animate, $document, $rootScope, $timeout;
   var toastr;
 
+  beforeEach(module('ngAnimate'));
+  beforeEach(module('ngAnimateMock'));
   beforeEach(module('toastr'));
 
   beforeEach(inject(function(_$animate_, _$document_, _$rootScope_, _$timeout_, _toastr_) {
@@ -82,11 +84,6 @@ describe('toastr', function() {
     return $document.find('body > #toast-container > .toast').eq(toast || 0);
   }
 
-  // Needed when we want to run the callback of enter or leave.
-  function animationFlush() {
-    timeoutFlush();
-  }
-
   function checkForEmptyTimeoutQueue() {
     expect(function() {
       $timeout.flush();
@@ -117,7 +114,8 @@ describe('toastr', function() {
       toast = toastr[type](message, null, options);
     }
     $rootScope.$digest();
-    animationFlush();
+    triggerCallbacks(); // For container
+    triggerCallbacks(); // To actually show a toast
     return toast;
   }
 
@@ -126,11 +124,17 @@ describe('toastr', function() {
       toastr.success('message', 'title');
     }
     $rootScope.$digest();
-    animationFlush();
+    triggerCallbacks(); // For container
+    triggerCallbacks(); // To actually show a toast
   }
 
   function timeoutFlush() {
     $timeout.flush();
+  }
+
+  function triggerCallbacks() {
+    $animate.triggerCallbacks();
+    $rootScope.$digest();
   }
 
   describe('basic scenarios', function() {
@@ -188,7 +192,7 @@ describe('toastr', function() {
       toastr.clear(toast);
       $rootScope.$digest();
       expect($document).toHaveToastOpen(0);
-      animationFlush();
+      triggerCallbacks();
       expect($document).not.toHaveToastContainer();
     });
 
@@ -198,7 +202,7 @@ describe('toastr', function() {
       toastr.clear();
       $rootScope.$digest();
       expect($document).toHaveToastOpen(0);
-      animationFlush();
+      triggerCallbacks();
       expect($document).not.toHaveToastContainer();
     });
   });
@@ -217,7 +221,7 @@ describe('toastr', function() {
       clickToast();
       expect($document).toHaveToastContainer();
       clickToast();
-      animationFlush();
+      triggerCallbacks();
       expect($document).not.toHaveToastContainer();
     });
 
@@ -228,7 +232,7 @@ describe('toastr', function() {
       clickToast();
       expect($document).toHaveToastContainer();
       clickToast();
-      animationFlush();
+      triggerCallbacks();
       expect($document).not.toHaveToastContainer();
       openToasts(1);
       expect($document).toHaveToastContainer();
@@ -239,6 +243,7 @@ describe('toastr', function() {
     it('should not close a toast if hovered', function() {
       openToasts(1);
       hoverToast();
+      $timeout.flush(); // Extra timeout flush here for the angular update, no reason why (check issue #4)
       checkForEmptyTimeoutQueue();
       expect($document).toHaveToastOpen(1);
     });
@@ -254,6 +259,7 @@ describe('toastr', function() {
     it('should re-enable the timeout of a toast if you leave it', function() {
       openToasts(1);
       hoverToast();
+      $timeout.flush(); // Extra timeout flush here for the angular update, no reason why (check issue #4)
       checkForEmptyTimeoutQueue();
       expect($document).toHaveToastOpen(1);
       leaveToast();
@@ -284,12 +290,14 @@ describe('toastr', function() {
         timeOut: 0
       };
       openToast('info', 'I don\'t want to go...', null, options);
+      $timeout.flush(); // Extra timeout flush here for the update, no reason why (check issue #4)
       checkForEmptyTimeoutQueue();
       expect($document).toHaveToastOpen(1);
       clickToast();
       expect($document).toHaveToastOpen(0);
 
       openToast('info', 'I don\'t want to go...', null, options);
+      $timeout.flush(); // Extra timeout flush here for the update, no reason why (check issue #4)
       checkForEmptyTimeoutQueue();
       expect($document).toHaveToastOpen(1);
       hoverToast();
@@ -304,6 +312,7 @@ describe('toastr', function() {
         extendedTimeOut: 0
       };
       openToast('info', 'I don\'t want to go...', null, options);
+      $timeout.flush(); // Extra timeout flush here for the angular update, no reason why (check issue #4)
       checkForEmptyTimeoutQueue();
       expect($document).toHaveToastOpen(1);
       hoverToast();
