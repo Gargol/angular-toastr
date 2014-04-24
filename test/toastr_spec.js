@@ -49,6 +49,13 @@ describe('toastr', function() {
         return this.actual.el.hasClass(typeClass);
       },
 
+      toHaveToastInPosition: function(position, toast) {
+        var domToast = this.actual.find('body > #toast-container > .toast').eq(position);
+        var message = domToast.find('.toast-message').text();
+
+        return message === toast.scope.message;
+      },
+
       toHaveToastWithMessage: function(message, toast) {
         var contentToCompare, toastDomEl = this.actual.find('body > #toast-container > .toast').eq(toast || 0);
 
@@ -327,6 +334,32 @@ describe('toastr', function() {
         allowHtml: true
       });
       expect(toast).toHaveA('button');
+    });
+
+    describe('append and prepend', function() {
+      it('appends the toasts by default', function() {
+        var toast1 = openToast('success', 'message1', 'title');
+        var toast2 = openToast('success', 'message2', 'title');
+        var toast3 = openToast('success', 'message3', 'title');
+
+        expect($document).toHaveToastInPosition(0, toast1);
+        expect($document).toHaveToastInPosition(1, toast2);
+        expect($document).toHaveToastInPosition(2, toast3);
+      });
+
+      it('prepends the toasts with the right option', function() {
+        var options = {
+          prepend: true
+        };
+
+        var toast1 = openToast('success', 'message1', 'title', options);
+        var toast2 = openToast('success', 'message2', 'title', options);
+        var toast3 = openToast('success', 'message3', 'title', options);
+
+        expect($document).toHaveToastInPosition(2, toast1);
+        expect($document).toHaveToastInPosition(1, toast2);
+        expect($document).toHaveToastInPosition(0, toast3);
+      });
     });
   });
 });

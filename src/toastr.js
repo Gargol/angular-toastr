@@ -58,6 +58,7 @@ angular.module('toastr', [])
       warning: 'toast-warning'
     },
     messageClass: 'toast-message',
+    prepend: false,
     positionClass: 'toast-top-right',
     timeOut: 5000,
     titleClass: 'toast-title',
@@ -164,7 +165,7 @@ angular.module('toastr', [])
       toasts.push(newToast);
 
       _setContainer(options).then(function() {
-        if (container[0].lastChild) {
+        if (container[0].lastChild && !options.prepend) {
           $animate.enter(newToast.el, container, angular.element(container[0].lastChild), function() {
             newToast.scope.init();
           });
